@@ -1,0 +1,2185 @@
+{
+  "info": {
+    "_postman_id": "e7fd1b93-dd69-412a-aff3-c5e05af8da24",
+    "name": "V8",
+    "description": "Компактная версия под тестовое задание",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://restful-booker.herokuapp.com"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "bookingId",
+      "value": ""
+    },
+    {
+      "key": "oldToken",
+      "value": ""
+    },
+    {
+      "key": "corruptedToken",
+      "value": ""
+    },
+    {
+      "key": "authBookingId",
+      "value": ""
+    },
+    {
+      "key": "typePutBookingId",
+      "value": ""
+    },
+    {
+      "key": "typePatchBookingId",
+      "value": ""
+    },
+    {
+      "key": "respGetBookingId",
+      "value": ""
+    },
+    {
+      "key": "respPutBookingId",
+      "value": ""
+    },
+    {
+      "key": "respPatchBookingId",
+      "value": ""
+    },
+    {
+      "key": "deleteLifecycleId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Auth",
+      "item": [
+        {
+          "name": "AUTH-POST-001 Valid credentials",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200',()=>pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.test('Token returned',()=>pm.expect(j.token).to.be.a('string').and.not.empty); if(j.token) pm.collectionVariables.set('token',j.token);"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — AUTH-001 Valid credentials"
+        },
+        {
+          "name": "AUTH-POST-002 Wrong password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"wrong\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Error HTTP status expected',()=>pm.expect(pm.response.code).to.be.within(400,499));",
+                  "pm.test('Status 200',()=>pm.response.to.have.status(200));",
+                  "pm.test('Bad credentials reason',()=>pm.expect(pm.response.json().reason).to.eql('Bad credentials')); "
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — AUTH-002 Wrong password"
+        },
+        {
+          "name": "AUTH-POST-003 Wrong username",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"wrong\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Error HTTP status expected',()=>pm.expect(pm.response.code).to.be.within(400,499));",
+                  "pm.test('No token',()=>pm.expect(pm.response.json()).to.not.have.property('token')); "
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — AUTH-003 Wrong username"
+        },
+        {
+          "name": "AUTH-POST-004 Missing username",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Error HTTP status expected',()=>pm.expect(pm.response.code).to.be.within(400,499));",
+                  "pm.test('No token',()=>pm.expect(pm.response.json()).to.not.have.property('token')); "
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — AUTH-004 Missing username"
+        },
+        {
+          "name": "AUTH-POST-005 Missing password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Error HTTP status expected',()=>pm.expect(pm.response.code).to.be.within(400,499));",
+                  "pm.test('No token',()=>pm.expect(pm.response.json()).to.not.have.property('token')); "
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — AUTH-005 Missing password"
+        },
+        {
+          "name": "AUTH-POST-006 Empty body",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Error HTTP status expected',()=>pm.expect(pm.response.code).to.be.within(400,499));",
+                  "pm.test('No token',()=>pm.expect(pm.response.json()).to.not.have.property('token')); "
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — AUTH-006 Empty body"
+        },
+        {
+          "name": "AUTH-POST-007 Malformed JSON",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Error HTTP status expected',()=>pm.expect(pm.response.code).to.be.within(400,499));",
+                  "pm.test('Client/server rejects malformed JSON',()=>pm.expect(pm.response.code).to.be.oneOf([400,500]));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — AUTH-007 Malformed JSON"
+        }
+      ]
+    },
+    {
+      "name": "02 Create Booking",
+      "item": [
+        {
+          "name": "BOOKING-POST-001 Create full booking",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"QA\",\n  \"lastname\": \"Candidate\",\n  \"totalprice\": 123,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-10-10\",\n    \"checkout\": \"2026-10-12\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200',()=>pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.test('bookingid returned',()=>pm.expect(j.bookingid).to.be.a('number')); if(j.bookingid) pm.collectionVariables.set('bookingId',j.bookingid);",
+                  "pm.test('Booking payload echoed',()=>{const j=pm.response.json().booking; pm.expect(j.firstname).to.eql('QA'); pm.expect(j.lastname).to.eql('Candidate');});"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-POST-001 Create full booking"
+        },
+        {
+          "name": "BOOKING-POST-002 Without optional additionalneeds",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"QA\",\n  \"lastname\": \"Candidate\",\n  \"totalprice\": 123,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-10-10\",\n    \"checkout\": \"2026-10-12\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-POST-002 Without optional additionalneeds"
+        },
+        {
+          "name": "BOOKING-POST-003 Missing firstname",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lastname\": \"Candidate\",\n  \"totalprice\": 123,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-10-10\",\n    \"checkout\": \"2026-10-12\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Validation error expected',()=>pm.expect(pm.response.code).to.be.within(400,499));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-POST-003 Missing firstname"
+        },
+        {
+          "name": "BOOKING-POST-004 Missing lastname",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"QA\",\n  \"totalprice\": 123,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-10-10\",\n    \"checkout\": \"2026-10-12\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Validation error expected',()=>pm.expect(pm.response.code).to.be.within(400,499));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-POST-004 Missing lastname"
+        },
+        {
+          "name": "BOOKING-POST-005 Missing totalprice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"QA\",\n  \"lastname\": \"Candidate\",\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-10-10\",\n    \"checkout\": \"2026-10-12\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Validation error expected',()=>pm.expect(pm.response.code).to.be.within(400,499));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-POST-005 Missing totalprice"
+        },
+        {
+          "name": "BOOKING-POST-006 Missing depositpaid",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"QA\",\n  \"lastname\": \"Candidate\",\n  \"totalprice\": 123,\n  \"bookingdates\": {\n    \"checkin\": \"2026-10-10\",\n    \"checkout\": \"2026-10-12\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Validation error expected',()=>pm.expect(pm.response.code).to.be.within(400,499));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-POST-006 Missing depositpaid"
+        },
+        {
+          "name": "BOOKING-POST-007 Missing bookingdates",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"QA\",\n  \"lastname\": \"Candidate\",\n  \"totalprice\": 123,\n  \"depositpaid\": true,\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Validation error expected',()=>pm.expect(pm.response.code).to.be.within(400,499));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-POST-007 Missing bookingdates"
+        },
+        {
+          "name": "BOOKING-POST-008 Invalid totalprice type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"QA\",\n  \"lastname\": \"Candidate\",\n  \"totalprice\": \"abc\",\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-10-10\",\n    \"checkout\": \"2026-10-12\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Validation error expected',()=>pm.expect(pm.response.code).to.be.within(400,499));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-POST-008 Invalid totalprice type"
+        },
+        {
+          "name": "BOOKING-POST-009 Invalid depositpaid type",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"QA\",\n  \"lastname\": \"Candidate\",\n  \"totalprice\": 123,\n  \"depositpaid\": \"yes\",\n  \"bookingdates\": {\n    \"checkin\": \"2026-10-10\",\n    \"checkout\": \"2026-10-12\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Validation error expected',()=>pm.expect(pm.response.code).to.be.within(400,499));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-POST-009 Invalid depositpaid type"
+        },
+        {
+          "name": "BOOKING-POST-010 Invalid checkin date",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"QA\",\n  \"lastname\": \"Candidate\",\n  \"totalprice\": 123,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"not-a-date\",\n    \"checkout\": \"2026-10-12\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Invalid date must be rejected',()=>pm.expect(pm.response.code).to.be.within(400,499));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-POST-010 Invalid checkin date"
+        },
+        {
+          "name": "BOOKING-POST-011 Checkout before checkin",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"QA\",\n  \"lastname\": \"Candidate\",\n  \"totalprice\": 123,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-10-10\",\n    \"checkout\": \"2026-10-01\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Invalid date range must be rejected',()=>pm.expect(pm.response.code).to.be.within(400,499));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-POST-011 Checkout before checkin"
+        }
+      ]
+    },
+    {
+      "name": "03 Get Booking IDs and Filters",
+      "item": [
+        {
+          "name": "BOOKING-GET-001 All IDs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200',()=>pm.response.to.have.status(200));",
+                  "pm.test('Array of booking IDs',()=>{const j=pm.response.json();pm.expect(j).to.be.an('array'); j.forEach(x=>pm.expect(x.bookingid).to.be.a('number'));});"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-GET-001 All IDs"
+        },
+        {
+          "name": "BOOKING-GET-002 firstname filter",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking?firstname=QA"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-GET-002 firstname filter"
+        },
+        {
+          "name": "BOOKING-GET-003 lastname filter",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking?lastname=Candidate"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-GET-003 lastname filter"
+        },
+        {
+          "name": "BOOKING-GET-004 firstname + lastname",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking?firstname=QA&lastname=Candidate"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-GET-004 firstname + lastname"
+        },
+        {
+          "name": "BOOKING-GET-005 checkin filter",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking?checkin=2026-10-01"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-GET-005 checkin filter"
+        },
+        {
+          "name": "BOOKING-GET-006 checkout filter",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking?checkout=2026-10-31"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-GET-006 checkout filter"
+        },
+        {
+          "name": "BOOKING-GET-007 no matches",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking?firstname=NoSuchName_987654"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200',()=>pm.response.to.have.status(200));",
+                  "pm.test('Empty result',()=>pm.expect(pm.response.json()).to.be.an('array').that.is.empty);"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-GET-007 no matches"
+        },
+        {
+          "name": "BOOKING-GET-008 invalid date filter",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking?checkin=bad-date"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Invalid filter rejected',()=>pm.expect(pm.response.code).to.be.within(400,499));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-GET-008 invalid date filter"
+        },
+        {
+          "name": "BOOKING-GET-009 checkin + checkout filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking?checkin=2026-10-01&checkout=2026-10-05"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array')); "
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-GET-009 checkin + checkout filters"
+        },
+        {
+          "name": "BOOKING-GET-010 firstname + lastname + checkin + checkout filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking?firstname=QA&lastname=Candidate&checkin=2026-10-01&checkout=2026-10-05"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array')); "
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOK-GET-010 firstname + lastname + checkin + checkout filters"
+        }
+      ]
+    },
+    {
+      "name": "04 Get Booking by ID",
+      "item": [
+        {
+          "name": "BOOKINGID-GET-001 Existing booking",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{bookingId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200',()=>pm.response.to.have.status(200));",
+                  "pm.test('Booking schema',()=>{const j=pm.response.json(); ['firstname','lastname','totalprice','depositpaid','bookingdates'].forEach(k=>pm.expect(j).to.have.property(k));});"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — ID-GET-001 Existing booking"
+        },
+        {
+          "name": "BOOKINGID-GET-002 Nonexistent ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/999999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — ID-GET-002 Nonexistent ID"
+        },
+        {
+          "name": "BOOKINGID-GET-003 Non-numeric ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/abc"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('No booking returned',()=>pm.expect(pm.response.code).to.be.oneOf([400,404]));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — ID-GET-003 Non-numeric ID"
+        }
+      ]
+    },
+    {
+      "name": "05 PUT Update",
+      "item": [
+        {
+          "name": "BOOKINGID-PUT-001 Full update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{bookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Updated\",\n  \"lastname\": \"Candidate\",\n  \"totalprice\": 123,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-10-10\",\n    \"checkout\": \"2026-10-12\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Updated value returned',()=>pm.expect(pm.response.json().firstname).to.eql('Updated'));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — PUT-001 Full update"
+        },
+        {
+          "name": "BOOKINGID-PUT-002 No authorization",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{bookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Updated\",\n  \"lastname\": \"Candidate\",\n  \"totalprice\": 123,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-10-10\",\n    \"checkout\": \"2026-10-12\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — PUT-002 No authorization"
+        },
+        {
+          "name": "BOOKINGID-PUT-003 Invalid token",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token=invalid"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{bookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Updated\",\n  \"lastname\": \"Candidate\",\n  \"totalprice\": 123,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-10-10\",\n    \"checkout\": \"2026-10-12\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — PUT-003 Invalid token"
+        },
+        {
+          "name": "BOOKINGID-PUT-004 Missing required field",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{bookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lastname\": \"Candidate\",\n  \"totalprice\": 123,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-10-10\",\n    \"checkout\": \"2026-10-12\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Validation error expected',()=>pm.expect(pm.response.code).to.be.within(400,499));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — PUT-004 Missing required field"
+        },
+        {
+          "name": "BOOKINGID-PUT-005 Nonexistent booking",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/999999999",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Updated\",\n  \"lastname\": \"Candidate\",\n  \"totalprice\": 123,\n  \"depositpaid\": true,\n  \"bookingdates\": {\n    \"checkin\": \"2026-10-10\",\n    \"checkout\": \"2026-10-12\"\n  },\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Not found expected',()=>pm.expect(pm.response.code).to.eql(404));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — PUT-005 Nonexistent booking"
+        }
+      ]
+    },
+    {
+      "name": "06 PATCH Partial Update",
+      "item": [
+        {
+          "name": "BOOKINGID-PATCH-001 Firstname only",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{bookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Patched\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Firstname patched',()=>pm.expect(pm.response.json().firstname).to.eql('Patched'));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — PATCH-001 Firstname only"
+        },
+        {
+          "name": "BOOKINGID-PATCH-002 Booking dates only",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{bookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingdates\": {\n    \"checkin\": \"2026-11-01\",\n    \"checkout\": \"2026-11-05\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — PATCH-002 Booking dates only"
+        },
+        {
+          "name": "BOOKINGID-PATCH-003 No authorization",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{bookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"X\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — PATCH-003 No authorization"
+        },
+        {
+          "name": "BOOKINGID-PATCH-004 Invalid token",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token=invalid"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{bookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"X\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — PATCH-004 Invalid token"
+        },
+        {
+          "name": "BOOKINGID-PATCH-005 Nonexistent booking",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/999999999",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"X\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Not found expected',()=>pm.expect(pm.response.code).to.eql(404));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — PATCH-005 Nonexistent booking"
+        }
+      ]
+    },
+    {
+      "name": "07 DELETE",
+      "item": [
+        {
+          "name": "BOOKINGID-DELETE-001 No authorization",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{bookingId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — DEL-002 No authorization"
+        },
+        {
+          "name": "BOOKINGID-DELETE-002 Invalid token",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token=invalid"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{bookingId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — DEL-003 Invalid token"
+        },
+        {
+          "name": "BOOKINGID-DELETE-003 Nonexistent booking",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/999999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Not found expected',()=>pm.expect(pm.response.code).to.eql(404));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — DEL-004 Nonexistent booking"
+        },
+        {
+          "name": "BOOKINGID-DELETE-004 Delete existing booking",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{bookingId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Documented success status 201',()=>pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — DEL-001 Delete existing booking"
+        },
+        {
+          "name": "BOOKINGID-GET-004 DEL-001b Verify deletion",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{bookingId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — DEL-001b Verify deletion"
+        },
+        {
+          "name": "BOOKING-POST-012 Create booking for delete lifecycle",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Delete\",\n  \"lastname\": \"Lifecycle\",\n  \"totalprice\": 111,\n  \"depositpaid\": false,\n  \"bookingdates\": {\"checkin\": \"2026-12-01\", \"checkout\": \"2026-12-05\"},\n  \"additionalneeds\": \"Breakfast\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.test('bookingid returned',()=>pm.expect(j.bookingid).to.be.a('number')); if(j.bookingid) pm.collectionVariables.set('deleteLifecycleId', j.bookingid);"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — DEL-LIFE-001 Create booking for delete lifecycle"
+        },
+        {
+          "name": "BOOKINGID-DELETE-005 Delete created booking",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{deleteLifecycleId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Documented success status 201',()=>pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — DEL-LIFE-002 Delete created booking"
+        },
+        {
+          "name": "BOOKINGID-GET-005 GET deleted booking",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{deleteLifecycleId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Deleted booking is not available', () => pm.expect(pm.response.code).to.be.oneOf([404]));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — DEL-LIFE-003 GET deleted booking"
+        },
+        {
+          "name": "BOOKINGID-PUT-006 PUT deleted booking",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{deleteLifecycleId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Edited\",\n  \"lastname\": \"AfterDelete\",\n  \"totalprice\": 222,\n  \"depositpaid\": true,\n  \"bookingdates\": {\"checkin\": \"2026-12-02\", \"checkout\": \"2026-12-06\"},\n  \"additionalneeds\": \"Dinner\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Deleted booking cannot be updated', () => pm.expect(pm.response.code).to.be.oneOf([404,405]));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — DEL-LIFE-004 PUT deleted booking"
+        },
+        {
+          "name": "BOOKINGID-PATCH-006 PATCH deleted booking",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{deleteLifecycleId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"PatchedAfterDelete\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Deleted booking cannot be patched', () => pm.expect(pm.response.code).to.be.oneOf([404,405]));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — DEL-LIFE-005 PATCH deleted booking"
+        }
+      ]
+    },
+    {
+      "name": "08 Health",
+      "item": [
+        {
+          "name": "PING-GET-001 Health check",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/ping"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Documented status 201',()=>pm.response.to.have.status(201));",
+                  "pm.test('Response time under 2s',()=>pm.expect(pm.response.responseTime).to.be.below(2000));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — PING-001 Health check"
+        }
+      ]
+    },
+    {
+      "name": "09 Authorization lifecycle",
+      "item": [
+        {
+          "name": "AUTH-POST-008 Save current token as oldToken",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"admin\",\"password\":\"password123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.test('Token returned',()=>pm.expect(j.token).to.be.a('string').and.not.empty);",
+                  "if (j.token) { pm.collectionVariables.set('oldToken', j.token); pm.collectionVariables.set('corruptedToken', j.token.slice(0,-1) + (j.token.slice(-1)==='x'?'y':'x')); }"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — AUTH-V001 Save current token as oldToken"
+        },
+        {
+          "name": "AUTH-POST-009 Re-authenticate and store new token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"admin\",\"password\":\"password123\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.test('New token returned',()=>pm.expect(j.token).to.be.a('string').and.not.empty); if(j.token) pm.collectionVariables.set('token',j.token);"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — AUTH-V002 Re-authenticate and store new token"
+        },
+        {
+          "name": "BOOKING-POST-013 Create booking for authorization tests",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/booking",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Auth\",\n  \"lastname\": \"Validation\",\n  \"totalprice\": 111,\n  \"depositpaid\": false,\n  \"bookingdates\": {\"checkin\": \"2026-11-10\", \"checkout\": \"2026-11-12\"},\n  \"additionalneeds\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200',()=>pm.response.to.have.status(200));",
+                  "const j=pm.response.json(); pm.test('bookingid returned',()=>pm.expect(j.bookingid).to.be.a('number')); if(j.bookingid) pm.collectionVariables.set('authBookingId',j.bookingid);"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOKING-POST-V001 Create booking for authorization tests"
+        },
+        {
+          "name": "BOOKINGID-PUT-007 Control: new token is valid",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{authBookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Auth\",\n  \"lastname\": \"NewToken\",\n  \"totalprice\": 111,\n  \"depositpaid\": false,\n  \"bookingdates\": {\"checkin\": \"2026-11-10\", \"checkout\": \"2026-11-12\"},\n  \"additionalneeds\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('New token successfully authorizes update', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOKING-PUT-AUTH-NEW Control: new token is valid"
+        },
+        {
+          "name": "BOOKINGID-PUT-008 Старый ранее валидный token — исследовательская проверка",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{oldToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{authBookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"Auth\",\n  \"lastname\": \"Validation\",\n  \"totalprice\": 111,\n  \"depositpaid\": false,\n  \"bookingdates\": {\"checkin\": \"2026-11-10\", \"checkout\": \"2026-11-12\"},\n  \"additionalneeds\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response received',()=>pm.expect(pm.response.code).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOKING-PUT-AUTH-OLD Старый ранее валидный token — исследовательская проверка"
+        },
+        {
+          "name": "BOOKINGID-PATCH-007 Старый ранее валидный token — исследовательская проверка",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{oldToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{authBookingId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstname\": \"AuthCheck\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response received',()=>pm.expect(pm.response.code).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOKING-PATCH-AUTH-OLD Старый ранее валидный token — исследовательская проверка"
+        },
+        {
+          "name": "BOOKINGID-DELETE-006 Старый ранее валидный token — исследовательская проверка",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{oldToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/999999999"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Response received',()=>pm.expect(pm.response.code).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOKING-DELETE-AUTH-OLD Старый ранее валидный token — исследовательская проверка"
+        },
+        {
+          "name": "BOOKINGID-DELETE-007 Delete authorization-test booking",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Cookie",
+                "value": "token={{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/booking/{{authBookingId}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cleanup accepted',()=>pm.expect([201,200]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ],
+          "description": "Источник: V7.2 — BOOKING-DELETE-AUTH-CLEANUP Delete authorization-test booking"
+        }
+      ]
+    }
+  ]
+}
